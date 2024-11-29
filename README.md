@@ -1,2 +1,0 @@
-# EPITA-MyDBS
-MyDBS Project
