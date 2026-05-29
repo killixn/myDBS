@@ -1,0 +1,49 @@
+debugging suite
+
+A set of tools for static and dynamic analysis of ELF binaries.
+Implements behavior similar to nm, strace, and gdb.
+
+my_nm displays the symbol table of an ELF binary, my_strace traces
+system calls made by a program, and my_db lets you debug a binary
+interactively.
+
+Usage:
+$ ./my_nm /path/to/binary
+    0000000000000000	0	STT_NOTYPE	STB_LOCAL	STV_DEFAULT	UND
+    0000000000000000	0	STT_SECTION	STB_LOCAL	STV_DEFAULT	.text
+    0000000000000000	0	STT_SECTION	STB_LOCAL	STV_DEFAULT	.rodata
+    0000000000000000	24	STT_FUNC	STB_GLOBAL	STV_DEFAULT	.text	do_calc
+    0000000000000018	98	STT_FUNC	STB_GLOBAL	STV_DEFAULT	.text	main
+    0000000000000000	0	STT_NOTYPE	STB_GLOBAL	STV_DEFAULT	UND	printf
+
+$ ./my_strace /path/to/binary [forbidden_syscalls]
+    brk(addr = 0x0) = 93824992378880
+    arch_prctl() = -22
+    mmap(addr = 0x0, length = 8192, prot = 3, flags = -134308681, fd = -1, offset = 0) = 140737353854976
+    access(pathname = "/etc/ld.so.preload", mode = 4) = -2
+    ...
+    forbidden syscall blocked: read
+    close(fd = 3) = 0
+    /bin/ls: error while loading shared libraries: /lib/x86_64-linux-gnu/libselinux.so.1: cannot read file data: Operation not permitted
+    writev(fd = 2, iov = 0x7fffffffd040, iovcnt = 10) = 133
+    program exited with code 127
+
+$ ./my_db /path/to/binary
+    > continue
+    before breakpoint
+    > registers
+    rax: 0x14 rbx: 0x7fffffffde08
+    ...
+    > quit
+
+my_db provides the following commands to control a running program:
+    *	help                 display available commands
+    *	quit                 exit the debugger
+    *	kill                 kill the debugged process
+    *	continue             resume execution
+    *	registers            display process registers
+    *	x/d/u count addr     dump memory in hex, signed or unsigned decimal
+    *	break addr|symbol    set a breakpoint
+    *	blist                list active breakpoints
+    *	bdel N               delete breakpoint N
+    *	bt                   display the callstack
